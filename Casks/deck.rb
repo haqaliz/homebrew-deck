@@ -21,8 +21,8 @@
 # All of this goes away the day notarization lands; drop it from here, the tap
 # and the README then.
 cask "deck" do
-  version "1.57"
-  sha256 "5462e3ef0b185dd01a6d60df13a91fed3894a407167a7e7c3abc94e0b98366e2"
+  version "1.58"
+  sha256 "331c77b529c5a4d9c4c411cbf4b99e94d59e0b282d7c3d2bb9aab0d6c0e584d5"
 
   url "https://github.com/haqaliz/deck/releases/download/v#{version}/Deck-v#{version}.dmg"
   name "Deck"
@@ -49,10 +49,13 @@ cask "deck" do
   # of its own regardless of how they are written. Reordering them changes
   # nothing but the linter's opinion.
   uninstall launchctl: [
+              "io.github.haqaliz.deck.agent",
+              "io.github.haqaliz.deck.agent.processes",
+              # pre-rename agents; a no-op on installs that never had them
               "com.deck.agent",
               "com.deck.agent.processes",
             ],
-            quit:      "com.deck.app",
+            quit:      "io.github.haqaliz.deck",
             # `trash:`, not `delete:`. Homebrew's uninstall_delete hardcodes
             # `sudo: true` — it is the directive for files outside the user's
             # control — so
@@ -62,6 +65,8 @@ cask "deck" do
             # Measured 2026-08-26. These files are the user's own; trashing
             # them needs no privilege and is recoverable.
             trash:     [
+              "~/Library/LaunchAgents/io.github.haqaliz.deck.agent.plist",
+              "~/Library/LaunchAgents/io.github.haqaliz.deck.agent.processes.plist",
               "~/Library/LaunchAgents/com.deck.agent.plist",
               "~/Library/LaunchAgents/com.deck.agent.processes.plist",
             ]
@@ -74,6 +79,8 @@ cask "deck" do
   # plist is SIP-protected and survives deletion, after which containermanagerd
   # never rebuilds the skeleton and every widget renders blank.
   zap trash: [
+    "~/Library/Containers/io.github.haqaliz.deck.widgets/Data/Library/Application Support/Deck",
+    # the pre-rename container: settings are migrated out of it, never back in
     "~/Library/Containers/com.deck.app.widgets/Data/Library/Application Support/Deck",
     "~/Library/Logs/Deck",
   ]
